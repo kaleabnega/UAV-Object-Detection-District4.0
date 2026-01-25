@@ -41,6 +41,7 @@ mqtt_client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
 # ─── Load Class Labels ───────────────────────
 with open(LABELS_PATH, "r") as f:
     CLASS_NAMES = [line.strip() for line in f]
+VEHICLE_CLASS_IDS = {i for i, name in enumerate(CLASS_NAMES) if name in VEHICLE_CLASSES}
 
 # ─── Initialize Interpreter ──────────────────
 try:
@@ -110,6 +111,8 @@ def get_video_stream():
             conf = float(class_confs[cls_id])
             if conf < CONFIDENCE_THRESH:
                 continue
+            if cls_id not in VEHICLE_CLASS_IDS:
+                continue
 
             cx, cy, bw, bh = det[0], det[1], det[2], det[3]
             x1 = (cx - bw/2) * w
@@ -126,10 +129,10 @@ def get_video_stream():
             label = CLASS_NAMES[cls]
             if label in VEHICLE_CLASSES:
                 counts[label] += 1
-            # Draw box
-            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0,255,0), 2)
-            cv2.putText(frame, f"{label}:{conf:.2f}", (int(x1), int(y1)-5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
+                # Draw box for vehicles only
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0,255,0), 2)
+                cv2.putText(frame, f"{label}:{conf:.2f}", (int(x1), int(y1)-5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
 
         # Publish counts over TLS
         try:
