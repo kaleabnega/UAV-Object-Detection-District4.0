@@ -170,7 +170,7 @@ def get_video_stream(video_path=None):
         interpreter.set_tensor(inp_det['index'], inp)
         interpreter.invoke()
 
-        raw = interpreter.get_tensor(out_det['index'])[0]  # (84,8400)
+        raw = interpreter.get_tensor(out_det['index']).copy()[0]  # (84,8400)
         preds = raw.T  # (8400,84)
 
         boxes = []
