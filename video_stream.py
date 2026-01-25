@@ -1,5 +1,3 @@
-
-
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -9,6 +7,14 @@ import time
 import json
 import ssl
 import paho.mqtt.client as mqtt
+import tempfile
+import os
+import atexit
+
+try:
+    import streamlit as st
+except Exception:
+    st = None
 
 # ─── Config ────────────────────────────────────
 MODEL_PATH        = "./yolov8n_saved_model/yolov8n_int8.tflite"
@@ -23,10 +29,46 @@ VEHICLE_CLASSES   = {"car", "bus", "truck", "motorcycle", "bicycle"}
 MQTT_BROKER     = "localhost"
 MQTT_PORT       = 8883  # TLS port
 MQTT_TOPIC      = "vehicles/counts"
-CA_CERT         = "/home/kaleab/mqtt-certs/ca.crt"
-CLIENT_CERT     = "/home/kaleab/mqtt-certs/client.crt"
-CLIENT_KEY      = "/home/kaleab/mqtt-certs/client.key"
+CA_CERT         = "mqtt-certs/ca.crt"
+CLIENT_CERT     = "mqtt-certs/client.crt"
+CLIENT_KEY      = "mqtt-certs/client.key"
 
+_TEMP_CERT_FILES = []
+
+def _write_secret_to_tempfile(secret_value):
+    # Accept multiline PEM or "\n"-escaped strings from secrets/env.
+    if secret_value is None:
+        return None
+    content = secret_value.replace("\\n", "\n")
+    tfh = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    tfh.write(content)
+    tfh.flush()
+    tfh.close()
+    _TEMP_CERT_FILES.append(tfh.name)
+    return tfh.name
+
+def _cleanup_tempfiles():
+    for path in _TEMP_CERT_FILES:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+atexit.register(_cleanup_tempfiles)
+
+def _get_secret(name):
+    if st is not None and hasattr(st, "secrets") and name in st.secrets:
+        return st.secrets[name]
+    return os.getenv(name)
+
+_ca_secret = _get_secret("CA_CERT")
+_client_cert_secret = _get_secret("CLIENT_CERT")
+_client_key_secret = _get_secret("CLIENT_KEY")
+
+if _ca_secret and _client_cert_secret and _client_key_secret:
+    CA_CERT = _write_secret_to_tempfile(_ca_secret)
+    CLIENT_CERT = _write_secret_to_tempfile(_client_cert_secret)
+    CLIENT_KEY = _write_secret_to_tempfile(_client_key_secret)
 
 # ─── MQTT Setup with TLS ──────────────────────
 mqtt_client = mqtt.Client()
