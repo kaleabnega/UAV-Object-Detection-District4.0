@@ -24,6 +24,8 @@ IOU_THRESHOLD     = 0.5
 WEBCAM_INDEX      = 0
 INPUT_SIZE        = 640
 VEHICLE_CLASSES   = {"car", "bus", "truck", "motorcycle", "bicycle"}
+FALLBACK_IMAGE    = "vehicle-and-person.jpg"
+DEFAULT_VIDEO     = "test-video.mp4"
 
 # ─── MQTT Config ──────────────────────────────
 MQTT_BROKER     = "localhost"
@@ -129,16 +131,33 @@ def nms(boxes, thr):
     return keep
 
 # ─── Frame Generator ─────────────────────────
-def get_video_stream():
+def get_video_stream(video_path=None):
     cap = cv2.VideoCapture(WEBCAM_INDEX)
+    using_video = False
     if not cap.isOpened():
-        raise RuntimeError("Cannot open camera")
+        cap.release()
+        source = video_path or DEFAULT_VIDEO
+        cap = cv2.VideoCapture(source)
+        using_video = cap.isOpened()
+    use_fallback = not cap.isOpened()
+    if use_fallback:
+        cap.release()
+        fallback_frame = cv2.imread(FALLBACK_IMAGE)
+        if fallback_frame is None:
+            raise RuntimeError("Cannot open camera, video, and fallback image not found")
 
     prev = time.time()
     while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+        if use_fallback:
+            frame = fallback_frame.copy()
+            ret = True
+        else:
+            ret, frame = cap.read()
+            if not ret:
+                if using_video:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    continue
+                break
         h, w = frame.shape[:2]
 
         # Preprocess
@@ -200,4 +219,5 @@ def get_video_stream():
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         yield rgb_frame, counts
 
-    cap.release()
+    if not use_fallback:
+        cap.release()
