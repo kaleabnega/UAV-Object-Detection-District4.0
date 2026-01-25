@@ -144,7 +144,8 @@ def get_video_stream(video_path=None):
         cap.release()
         fallback_frame = cv2.imread(FALLBACK_IMAGE)
         if fallback_frame is None:
-            raise RuntimeError("Cannot open camera, video, and fallback image not found")
+            # Last-resort: return a blank frame so the app doesn't crash.
+            fallback_frame = np.zeros((INPUT_SIZE, INPUT_SIZE, 3), dtype=np.uint8)
 
     prev = time.time()
     while True:
