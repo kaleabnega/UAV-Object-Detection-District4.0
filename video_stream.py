@@ -32,6 +32,7 @@ MQTT_TOPIC      = "vehicles/counts"
 CA_CERT         = "mqtt-certs/ca.crt"
 CLIENT_CERT     = "mqtt-certs/client.crt"
 CLIENT_KEY      = "mqtt-certs/client.key"
+ENABLE_MQTT     = os.getenv("ENABLE_MQTT", "1") not in {"0", "false", "False", "no", "NO"}
 
 _TEMP_CERT_FILES = []
 
@@ -64,21 +65,27 @@ def _get_secret(name):
 _ca_secret = _get_secret("CA_CERT")
 _client_cert_secret = _get_secret("CLIENT_CERT")
 _client_key_secret = _get_secret("CLIENT_KEY")
+_enable_mqtt_secret = _get_secret("ENABLE_MQTT")
+if _enable_mqtt_secret is not None:
+    ENABLE_MQTT = str(_enable_mqtt_secret) not in {"0", "false", "False", "no", "NO"}
 
 if _ca_secret and _client_cert_secret and _client_key_secret:
     CA_CERT = _write_secret_to_tempfile(_ca_secret)
     CLIENT_CERT = _write_secret_to_tempfile(_client_cert_secret)
     CLIENT_KEY = _write_secret_to_tempfile(_client_key_secret)
 
-# ─── MQTT Setup with TLS ──────────────────────
-mqtt_client = mqtt.Client()
-mqtt_client.tls_set(
-    ca_certs=CA_CERT,
-    certfile=CLIENT_CERT,
-    keyfile=CLIENT_KEY,
-    tls_version=ssl.PROTOCOL_TLSv1_2
-)
-mqtt_client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
+if ENABLE_MQTT:
+    # ─── MQTT Setup with TLS ──────────────────────
+    mqtt_client = mqtt.Client()
+    mqtt_client.tls_set(
+        ca_certs=CA_CERT,
+        certfile=CLIENT_CERT,
+        keyfile=CLIENT_KEY,
+        tls_version=ssl.PROTOCOL_TLSv1_2
+    )
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
+else:
+    mqtt_client = None
 
 # ─── Load Class Labels ───────────────────────
 with open(LABELS_PATH, "r") as f:
@@ -177,10 +184,11 @@ def get_video_stream():
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
 
         # Publish counts over TLS
-        try:
-            mqtt_client.publish(MQTT_TOPIC, json.dumps(counts))
-        except Exception as e:
-            print(f"MQTT publish failed: {e}")
+        if mqtt_client is not None:
+            try:
+                mqtt_client.publish(MQTT_TOPIC, json.dumps(counts))
+            except Exception as e:
+                print(f"MQTT publish failed: {e}")
 
         # FPS overlay
         now = time.time()
