@@ -7,7 +7,7 @@ const scoreInput = document.getElementById("scoreInput");
 const scoreValue = document.getElementById("scoreValue");
 const fpsEl = document.getElementById("fps");
 const countEl = document.getElementById("count");
-const backendUrlInput = document.getElementById("backendUrl");
+const backendUrlInput = "http://localhost:8000";
 const chartCanvas = document.getElementById("chart");
 const chartCtx = chartCanvas.getContext("2d");
 const yAxis = document.getElementById("yAxis");
@@ -16,7 +16,7 @@ let stream = null;
 let running = false;
 let lastFrameTime = performance.now();
 let inFlight = false;
-const SAMPLE_VIDEO = "../test-video.mp4";
+const SAMPLE_VIDEO = "test-video.mp4";
 
 const captureCanvas = document.createElement("canvas");
 const captureCtx = captureCanvas.getContext("2d");
@@ -109,10 +109,7 @@ function drawChart() {
     chartCtx.stroke();
   }
 
-  const maxVal = Math.max(
-    1,
-    ...VEHICLE_CLASSES.flatMap((k) => history[k]),
-  );
+  const maxVal = Math.max(1, ...VEHICLE_CLASSES.flatMap((k) => history[k]));
   const stepX = w / (HISTORY_LEN - 1);
 
   if (yAxis) {
@@ -162,7 +159,7 @@ async function detectFrame() {
     form.append("file", blob, "frame.jpg");
 
     try {
-      const baseUrl = backendUrlInput.value.replace(/\/+$/, "");
+      const baseUrl = backendUrlInput;
       const res = await fetch(`${baseUrl}/detect`, {
         method: "POST",
         body: form,

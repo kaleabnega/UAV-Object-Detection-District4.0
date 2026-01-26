@@ -12,10 +12,9 @@ import paho.mqtt.client as mqtt
 
 # Paths relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
-MODEL_PATH = os.path.join(PROJECT_ROOT, "yolov8n_saved_model", "yolov8n_int8.tflite")
-LABELS_PATH = os.path.join(PROJECT_ROOT, "labels.txt")
+MODEL_PATH = os.path.join(BASE_DIR,"yolov8n_saved_model", "yolov8n_int8.tflite")
+LABELS_PATH = os.path.join(BASE_DIR, "labels.txt")
 
 CONFIDENCE_THRESH = 0.4
 IOU_THRESHOLD = 0.5

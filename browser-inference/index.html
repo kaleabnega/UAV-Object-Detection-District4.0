@@ -1,60 +1,60 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Browser Inference — Vehicle Detection</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <main class="page">
-      <header class="header">
-        <h1>Real-Time Vehicle Detection </h1>
-      </header>
 
-      <section class="controls">
-        <button id="startBtn">Play Sample Video</button>
-        <button id="stopBtn" disabled>Stop</button>
-        <label class="backend">
-          Backend URL
-          <input id="backendUrl" type="text" value="http://localhost:8000" />
-        </label>
-        <label class="score">
-          Min Score
-          <input id="scoreInput" type="range" min="0.2" max="0.9" step="0.05" value="0.4" />
-          <span id="scoreValue">0.40</span>
-        </label>
-      </section>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Browser Inference — Vehicle Detection</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
 
-      <section class="stage">
-        <video id="video" autoplay playsinline muted></video>
-        <canvas id="overlay"></canvas>
-      </section>
+<body>
+  <main class="page">
+    <header class="header">
+      <h1>Real-Time Vehicle Detection Using yolov8n_int8.tflite </h1>
+    </header>
 
-      <section class="stats">
-        <div>FPS: <span id="fps">0.0</span></div>
-        <div>Detections: <span id="count">0</span></div>
-      </section>
+    <section class="controls">
+      <button id="startBtn">Play Sample Video</button>
+      <button id="stopBtn" disabled>Stop</button>
 
-      <section class="chart">
-        <h2>Vehicle Counts Over Time</h2>
-        <div class="chart-wrap">
-          <div class="y-label">Count</div>
-          <div class="chart-shell">
-            <canvas id="chart"></canvas>
-            <div class="y-axis" id="yAxis">
-              <span>0</span>
-              <span>0</span>
-              <span>0</span>
-              <span>0</span>
-              <span>0</span>
-            </div>
+      <label class="score">
+        Min Score
+        <input id="scoreInput" type="range" min="0.2" max="0.9" step="0.05" value="0.4" />
+        <span id="scoreValue">0.40</span>
+      </label>
+    </section>
+
+    <section class="stage">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+    </section>
+
+    <section class="stats">
+      <div>FPS: <span id="fps">0.0</span></div>
+      <div>Detections: <span id="count">0</span></div>
+    </section>
+
+    <section class="chart">
+      <h2>Vehicle Counts Over Time</h2>
+      <div class="chart-wrap">
+        <div class="y-label">Count</div>
+        <div class="chart-shell">
+          <canvas id="chart"></canvas>
+          <div class="y-axis" id="yAxis">
+            <span>0</span>
+            <span>0</span>
+            <span>0</span>
+            <span>0</span>
+            <span>0</span>
           </div>
         </div>
-        <div class="x-label">Time (last 30 samples)</div>
-      </section>
-    </main>
+      </div>
+      <div class="x-label">Time (last 30 samples)</div>
+    </section>
+  </main>
 
-    <script src="./main.js"></script>
-  </body>
+  <script src="./main.js"></script>
+</body>
+
 </html>
