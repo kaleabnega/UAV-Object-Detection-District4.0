@@ -7,7 +7,8 @@ const scoreInput = document.getElementById("scoreInput");
 const scoreValue = document.getElementById("scoreValue");
 const fpsEl = document.getElementById("fps");
 const countEl = document.getElementById("count");
-const backendUrlInput = "https://uav-object-detection-district4-0.onrender.com";
+const backendUrlInput =
+  "https://uav-object-detection-district40-production.up.railway.app";
 const chartCanvas = document.getElementById("chart");
 const chartCtx = chartCanvas.getContext("2d");
 const yAxis = document.getElementById("yAxis");
