@@ -33,7 +33,8 @@ ENABLE_BROKER = os.getenv("ENABLE_BROKER", "0") not in {"0", "false", "False", "
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://yolov8-tflite-detection.netlify.app"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
